@@ -24,9 +24,9 @@ public class UIFactoryController : MonoBehaviour
             quantity = String.Concat("<color=red>", quantity, "</color>");
         }
 
-        if (_factory._needsResource.Count >= 0)
+        if (_factory._needsResource.Count > 0)
         {
-            string needsText = "Needs:";
+            string needsText = "Needs: \n";
             foreach (var storage in _factory._inputStorages)
             {
                 string needed = String.Concat(storage.Resource.ToString(), " ",storage.CurrentAmount.ToString(), "/", storage.Capacity.ToString());
@@ -36,6 +36,7 @@ public class UIFactoryController : MonoBehaviour
                 }
                 needsText = String.Concat(needsText, needed, "\n");
             }
+            _description.text = String.Concat(needsText, _description.text);
         }
         _description.text = string.Concat(_description.text, "\n", quantity);
     }
