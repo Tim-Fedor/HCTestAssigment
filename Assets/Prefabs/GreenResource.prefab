@@ -110,3 +110,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _movingSpeed: 5
   _rotateSpeed: 0
+  _type: 1

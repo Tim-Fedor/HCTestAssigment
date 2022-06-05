@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviour
                     {
                         if(neededResource.MoveToPoint(factory.transform.position, ResourceState.Stay))
                         {
-                            neededResource.transform.parent = factory.transform;
+                            neededResource.transform.parent = transform.parent;
                             int index = _resourcesInBackpack.IndexOf(neededResource);
                             _resourcesInBackpack.Remove(neededResource);
                         }

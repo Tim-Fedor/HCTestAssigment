@@ -9,12 +9,15 @@ public class ResourceObject : MonoBehaviour
     private float _movingSpeed;
     [SerializeField]
     private float _rotateSpeed;
+    [SerializeField]
+    private ResourceType _type;
 
     private bool _isMoving;
     private Vector3 _targetPoint;
     private Vector3 _targetDirection;
 
     private ResourceState _state;
+    
 
     public ResourceState State
     {
@@ -29,7 +32,13 @@ public class ResourceObject : MonoBehaviour
         }
     }
 
-    public ResourceType Type { get; }
+    public ResourceType Type
+    {
+        get
+        {
+            return _type;
+        }
+    }
 
     public delegate void OnStateChange();
     public event OnStateChange StateChanged;
