@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BaseFactory 
+public abstract class BaseFactory : MonoBehaviour
 {
-    protected ResourceType _resource;
-    protected List<ResourceType> _needsResource;
-    protected float _cooldown;
-    protected List<Storage> _inputStorages;
-    protected Storage _outputStorage;
+    public ResourceType _resource;
+    public List<ResourceType> _needsResource;
+    public float _cooldown;
+    public List<Storage> _inputStorages;
+    public Storage _outputStorage;
+
+
 
     protected BaseFactory(FactoryConfig config)
     {
@@ -26,5 +28,22 @@ public abstract class BaseFactory
     protected IEnumerator FactoryProcess()
     {
         yield return new WaitForSeconds(_cooldown);
+        TryStartNewProcess();
+        
+    }
+    
+    protected virtual void TryStartNewProcess()
+    {
+        Storage currentStorage; 
+        foreach (var resource in _needsResource)
+        {
+            currentStorage = _inputStorages.Find(x=>x.Resource == resource);
+            if (currentStorage == null || currentStorage.Capacity < 1)
+            {
+                return;
+            }
+        }
+     
+        StartCoroutine(FactoryProcess());
     }
 }

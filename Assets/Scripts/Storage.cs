@@ -4,6 +4,22 @@ public class Storage
     private int _capacity;
     private int _currentAmount;
 
+    public ResourceType Resource
+    {
+        get
+        {
+            return _resource;
+        }
+    }
+    
+    public int Capacity
+    {
+        get
+        {
+            return _capacity;
+        }
+    }
+
     public Storage(ResourceType type, int capacity)
     {
         _resource = type;
