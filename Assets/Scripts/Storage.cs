@@ -1,30 +1,30 @@
+using UnityEngine;
+
 public class Storage
 {
-    private ResourceType _resource;
-    private int _capacity;
-    private int _currentAmount;
-
-    public ResourceType Resource
+    private int _cur;
+    public int CurrentAmount
     {
         get
         {
-            return _resource;
+            return _cur;
         }
-    }
-    
-    public int Capacity
-    {
-        get
+        set
         {
-            return _capacity;
+            Debug.Log($"Trying set {value}");
+            _cur = value;
         }
     }
 
-    public Storage(ResourceType type, int capacity)
+    public ResourceType Resource { get; }
+
+    public int Capacity { get; }
+
+    public Storage(int capacity, ResourceType type)
     {
-        _resource = type;
-        _capacity = capacity;
-        _currentAmount = 0;
+        Resource = type;
+        Capacity = capacity;
+        CurrentAmount = 0;
     }
 
     public void GetItemFromStorage()
