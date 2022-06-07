@@ -141,7 +141,7 @@ namespace FactoryMechanics
 
         private bool CheckIfEnoughOutputSpace()
         {
-            return OutputStorage.CurrentAmount >= OutputStorage.Capacity;
+            return OutputStorage.CurrentAmount < OutputStorage.Capacity;
         }
 
         private bool CheckIfHaveAllNeeds()
