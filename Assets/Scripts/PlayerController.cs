@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private int _backpackCapacity;
     [SerializeField]
-    private Vector3 _bottomPointBackpack;
+    private Transform _bottomPointBackpack;
     [SerializeField]
     private float _offsetInBackpack;
     private List<ResourceObject> _resourcesInBackpack;
@@ -18,49 +18,68 @@ public class PlayerController : MonoBehaviour
         _resourcesInBackpack = new List<ResourceObject>();
     }
 
+    private void UpdateBackpack()
+    {
+        for(int i = 0; i < _resourcesInBackpack.Count; i++)
+        {
+            var resource = _resourcesInBackpack[i];
+            
+            var finishPoint = _bottomPointBackpack.localPosition;
+            if (_resourcesInBackpack.Count > 0)
+            {
+                finishPoint.y = _bottomPointBackpack.localPosition.y + i * _offsetInBackpack;
+            }
+
+
+            resource.MoveToPoint(finishPoint, ResourceState.Backpacked, _bottomPointBackpack.localRotation.eulerAngles);
+        }
+    }
+
     private void OnTriggerStay(Collider other)
     {
         var resource = other.GetComponent<ResourceObject>();
-        var factory = other.GetComponent<BaseFactory>();
         if (resource != null && resource.State != ResourceState.Backpacked)
         {
             if (_resourcesInBackpack.Count < _backpackCapacity)
             {
-                var finishPoint = _bottomPointBackpack;
+                var finishPoint = _bottomPointBackpack.localPosition;
                 if (_resourcesInBackpack.Count > 0)
                 {
-                    finishPoint.y = _bottomPointBackpack.y + _resourcesInBackpack.Count * _offsetInBackpack;
+                    finishPoint.y = _bottomPointBackpack.localPosition.y + _resourcesInBackpack.Count * _offsetInBackpack;
                 }
 
                 
-                if(resource.MoveToPoint(finishPoint, ResourceState.Backpacked))
+                if(resource.MoveToPoint(finishPoint, ResourceState.Backpacked, _bottomPointBackpack.localRotation.eulerAngles))
                 {
                     other.transform.parent = transform;
                     _resourcesInBackpack.Add(resource);
                 }
                 
             }
-        }else if (factory != null)
+        }else if (other.GetComponent<BaseFactory>() != null)
         {
+            var factory = other.GetComponent<BaseFactory>();
             foreach (var need in factory._needsResource)
             {
-                var neededResource = _resourcesInBackpack.Find(x => x.Type == need);
-                if (neededResource != null)
+                var neededResources = _resourcesInBackpack.FindAll(x => x.Type == need);
+                if (neededResources.Count > 0)
                 {
-                    if(factory.TryToGiveResource(neededResource))
+                    foreach (var neededResource in neededResources)
                     {
-                        if(neededResource.MoveToPoint(factory.transform.position, ResourceState.Stay))
+                        if(factory.TryToGiveResource(neededResource))
                         {
-                            neededResource.transform.parent = transform.parent;
-                            int index = _resourcesInBackpack.IndexOf(neededResource);
-                            _resourcesInBackpack.Remove(neededResource);
+                            if(neededResource.MoveToPoint(factory.transform.position, ResourceState.Stay))
+                            {
+                                neededResource.transform.parent = transform.parent;
+                                int index = _resourcesInBackpack.IndexOf(neededResource);
+                                _resourcesInBackpack.Remove(neededResource);
+                            }
                         }
                     }
                 }
             }
+            UpdateBackpack();
         }
     }
-    
-    
     
 }

@@ -15,21 +15,6 @@ public class BaseFactory : MonoBehaviour
     public GameObject _particles;
     private bool _isWorking;
 
-
-
-    protected BaseFactory(FactoryConfig config)
-    {
-        _resource = config.resource;
-        _cooldown = config.cooldown;
-        _needsResource = config.needsResource;
-        _inputStorages = new List<Storage>();
-        foreach (var resource in config.needsResource)
-        {
-            //_inputStorages.Add(new Storage(config.inputStorageCapacity));
-        }
-        //_outputStorage = new Storage(config.outputStorageCapacity);
-    }
-
     private void Start()
     {
         _outputStorage = new Storage(5, _resource);
@@ -47,24 +32,43 @@ public class BaseFactory : MonoBehaviour
         _isWorking = true;
         yield return new WaitForSeconds(_cooldown);
         var pair = GameConfigs.Instance?.ResourcesConfig?.allResources?.Find(x => x.type == _resource);
-        if (pair != null)
+        if (pair != null && pair.prefab != null)
         {
-            var newResource = Instantiate(pair.prefab, transform.position, transform.rotation);
-            var resource = newResource.GetComponent<ResourceObject>();
-            if (resource != null)
-            {
-                var finalPoint = _outputStorageStartPoint.position;
-                if (_outputStorage.CurrentAmount > 0)
-                {
-                    finalPoint.y = finalPoint.y + _outputStorage.CurrentAmount * _offsetForBlocks;
-                }
-                resource.MoveToPoint(finalPoint, ResourceState.Storaged);
-                resource.StateChanged += OnGiveResource;
-                _outputStorage.CurrentAmount++;
-            }
+            TryCreateNewResource(pair.prefab);
+            
         }
         TryStartNewProcess();
         
+    }
+
+    private void TryCreateNewResource(GameObject prefab)
+    {
+        var newResource = Instantiate(prefab, transform.position, transform.rotation);
+        var resource = newResource.GetComponent<ResourceObject>();
+        if (resource != null)
+        {
+            PayNeeds();
+            var finalPoint = _outputStorageStartPoint.position;
+            if (_outputStorage.CurrentAmount > 0)
+            {
+                finalPoint.y = finalPoint.y + _outputStorage.CurrentAmount * _offsetForBlocks;
+            }
+            resource.MoveToPoint(finalPoint, ResourceState.Storaged);
+            resource.StateChanged += OnGiveResource;
+            _outputStorage.CurrentAmount++;
+        }
+    }
+    
+    private void PayNeeds()
+    {
+        foreach (var resource in _needsResource)
+        {
+            var currentStorage = _inputStorages.Find(x=>x.Resource == resource);
+            if (currentStorage != null)
+            {
+                currentStorage.CurrentAmount--;
+            }
+        }
     }
     
     protected virtual void TryStartNewProcess()
@@ -86,20 +90,14 @@ public class BaseFactory : MonoBehaviour
             _isWorking = false;
             return;
         }
-        
-        foreach (var resource in _needsResource)
-        {
-            var currentStorage = _inputStorages.Find(x=>x.Resource == resource);
-            if (currentStorage != null)
-            {
-                currentStorage.CurrentAmount--;
-            }
-        }
         StartCoroutine(FactoryProcess());
     }
 
-    private void OnGiveResource()
+    private void OnGiveResource(ResourceObject resource)
     {
+        if(resource != null){
+            resource.StateChanged -= OnGiveResource;
+        }
         _outputStorage.CurrentAmount--;
         if(!_isWorking){
             TryStartNewProcess();
@@ -117,9 +115,7 @@ public class BaseFactory : MonoBehaviour
             }
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 }

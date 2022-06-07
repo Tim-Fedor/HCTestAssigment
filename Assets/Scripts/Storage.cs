@@ -11,7 +11,6 @@ public class Storage
         }
         set
         {
-            Debug.Log($"Trying set {value}");
             _cur = value;
         }
     }

@@ -109,5 +109,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _movingSpeed: 5
-  _rotateSpeed: 0
+  _rotateSpeed: 100
   _type: 2
+  _collider: {fileID: 6317192970250353101}
