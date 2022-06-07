@@ -1,32 +1,21 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameConfigs : MonoBehaviour
 {
-    public static GameConfigs Instance { get; private set; }
     public ResourcesConfig resourcesConfig;
+    public static GameConfigs Instance { get; private set; }
 
-    public ResourcesConfig ResourcesConfig
+    public ResourcesConfig ResourcesConfig => resourcesConfig;
+
+    private void Awake()
     {
-        get
+        if (Instance != null && Instance != this)
         {
-            return resourcesConfig;
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
         }
     }
-
-    private void Awake() 
-    {
-        if (Instance != null && Instance != this) 
-        { 
-            Destroy(this); 
-        } 
-        else 
-        { 
-            Instance = this; 
-        } 
-    }
-    
-    
 }

@@ -4,45 +4,25 @@ namespace Resource
 {
     public class ResourceObject : MonoBehaviour
     {
-        [SerializeField]
+        public delegate void OnStateChange(ResourceObject resource);
+
+        [SerializeField] 
         private float _movingSpeed;
-        [SerializeField]
+        [SerializeField] 
         private float _rotateSpeed;
-        [SerializeField]
+        [SerializeField] 
         private ResourceType _type;
-        [SerializeField]
+        [SerializeField] 
         private Collider _collider;
 
         private bool _isMoving;
-        private Vector3 _targetPoint;
+
         private Vector3 _targetDirection;
+        private Vector3 _targetPoint;
+        
+        public ResourceState State { get; private set; }
 
-        private ResourceState _state;
-    
-
-        public ResourceState State
-        {
-            get
-            {
-                return _state;
-            }
-            set
-            {
-                Debug.Log($"Trying value {value}");
-                _state = value;
-            }
-        }
-
-        public ResourceType Type
-        {
-            get
-            {
-                return _type;
-            }
-        }
-
-        public delegate void OnStateChange(ResourceObject resource);
-        public event OnStateChange StateChanged;
+        public ResourceType Type => _type;
 
         private void Update()
         {
@@ -50,17 +30,17 @@ namespace Resource
             {
                 return;
             }
-        
+
             transform.localPosition = Vector3.Lerp(transform.localPosition, _targetPoint, _movingSpeed * Time.deltaTime);
             if (_targetDirection != Vector3.zero)
             {
-                transform.localEulerAngles = Vector3.Lerp( transform.localRotation.eulerAngles, _targetDirection, _rotateSpeed);
+                transform.localEulerAngles = Vector3.Lerp(transform.localRotation.eulerAngles, _targetDirection, _rotateSpeed);
                 if (Vector3.Distance(transform.rotation.eulerAngles, _targetDirection) == 0f)
                 {
                     _targetDirection = Vector3.zero;
                 }
             }
-        
+
             if (Vector3.Distance(_targetPoint, transform.localPosition) < 0.01f)
             {
                 _isMoving = false;
@@ -71,6 +51,8 @@ namespace Resource
                 }
             }
         }
+
+        public event OnStateChange StateChanged;
 
         public bool MoveToPoint(Vector3 target, ResourceState newState)
         {
@@ -87,14 +69,14 @@ namespace Resource
             _collider.enabled = false;
             return true;
         }
-    
+
         public bool MoveToPoint(Vector3 target, ResourceState newState, Vector3 turnTo)
         {
             if (_isMoving)
             {
                 return false;
             }
-        
+
             MoveToPoint(target, newState);
             _targetDirection = turnTo;
             return true;

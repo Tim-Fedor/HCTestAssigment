@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MovementController : MonoBehaviour
 {
-    [SerializeField]
-    private Joystick _joystick;
-    [SerializeField]
-    private CharacterController _character;
-    [SerializeField]
-    private float _speed;
-    private float _gravityValue = -9.81f;
-    private Vector3 _playerVelocity;
+    [SerializeField] private Joystick _joystick;
+
+    [SerializeField] private CharacterController _character;
+
+    [SerializeField] private float _speed;
+
+    private readonly float _gravityValue = -9.81f;
     private bool _groundedPlayer;
+    private Vector3 _playerVelocity;
 
     private void Update()
     {
@@ -21,7 +19,7 @@ public class MovementController : MonoBehaviour
         {
             _playerVelocity.y = 0f;
         }
-        
+
         var move = new Vector3(_joystick.Horizontal, 0, _joystick.Vertical);
         _character.Move(move * (Time.deltaTime * _speed));
 
@@ -29,7 +27,7 @@ public class MovementController : MonoBehaviour
         {
             gameObject.transform.forward = move;
         }
-        
+
         _playerVelocity.y += _gravityValue * Time.deltaTime;
         _character.Move(_playerVelocity * Time.deltaTime);
     }

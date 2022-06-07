@@ -7,31 +7,39 @@ namespace FactoryMechanics
 {
     public class BaseFactory : MonoBehaviour
     {
-        [SerializeField]
+        [SerializeField] 
         private ResourceType _resource;
-        [SerializeField]
+        [SerializeField] 
         private List<ResourceType> _needsResource;
-        [SerializeField]
+        [SerializeField] 
         private float _cooldown;
-        [SerializeField]
+        [SerializeField] 
         private Transform _outputStorageStartPoint;
-        [SerializeField]
+        [SerializeField] 
         private float _offsetForBlocks;
-        [SerializeField]
+        [SerializeField] 
         private int _storageCapacity = 5;
-        [SerializeField]
+        [SerializeField] 
         private int _needsCapacity = 3;
-        [SerializeField]
+        [SerializeField] 
         private GameObject _particles;
-        private List<Storage> _inputStorages;
+
         private bool _isWorking;
-        private Storage _outputStorage;
+
+        public List<ResourceType> Needs => _needsResource;
+
+        public Storage OutputStorage { get; private set; }
+
+        public List<Storage> InputStorages { get; private set; }
 
         private void Start()
         {
-            _outputStorage = new Storage(_storageCapacity, _resource);
-            _inputStorages = new List<Storage>();
-            foreach (var resource in _needsResource) _inputStorages.Add(new Storage(_needsCapacity, resource));
+            OutputStorage = new Storage(_storageCapacity, _resource);
+            InputStorages = new List<Storage>();
+            foreach (var resource in _needsResource)
+            {
+                InputStorages.Add(new Storage(_needsCapacity, resource));
+            }
             TryStartNewProcess();
         }
 
@@ -42,20 +50,21 @@ namespace FactoryMechanics
                 StopWorking();
                 return;
             }
-            
-
             StartCoroutine(FactoryProcess());
         }
-        
+
         private IEnumerator FactoryProcess()
         {
             StartWorking();
             yield return new WaitForSeconds(_cooldown);
             var resourceInfo = GameConfigs.Instance?.ResourcesConfig?.allResources?.Find(x => x.type == _resource);
-            if (resourceInfo != null && resourceInfo.prefab != null) TryCreateNewResource(resourceInfo.prefab);
+            if (resourceInfo != null && resourceInfo.prefab != null)
+            {
+                TryCreateNewResource(resourceInfo.prefab);
+            }
             TryStartNewProcess();
-        }        
-        
+        }
+
         private void TryCreateNewResource(GameObject prefab)
         {
             var newResource = Instantiate(prefab, transform.position, transform.rotation);
@@ -65,40 +74,49 @@ namespace FactoryMechanics
                 PayNeeds();
                 MoveResourceToOutput(resource);
                 resource.StateChanged += OnGiveResource;
-                _outputStorage.CurrentAmount++;
+                OutputStorage.CurrentAmount++;
             }
         }
 
         private void MoveResourceToOutput(ResourceObject target)
         {
             var finalPoint = _outputStorageStartPoint.position;
-            if (_outputStorage.CurrentAmount > 0)
-                finalPoint.y = finalPoint.y + _outputStorage.CurrentAmount * _offsetForBlocks;
+            if (OutputStorage.CurrentAmount > 0){
+                finalPoint.y = finalPoint.y + OutputStorage.CurrentAmount * _offsetForBlocks;
+            }
             target.MoveToPoint(finalPoint, ResourceState.Storaged);
         }
 
-        
+
         private void PayNeeds()
         {
             foreach (var resource in _needsResource)
             {
-                var currentStorage = _inputStorages.Find(x => x.Resource == resource);
-                if (currentStorage != null) currentStorage.CurrentAmount--;
+                var currentStorage = InputStorages.Find(x => x.Resource == resource);
+                if (currentStorage != null)
+                {
+                    currentStorage.CurrentAmount--;
+                }
             }
         }
 
 
-
         private void OnGiveResource(ResourceObject resource)
         {
-            if (resource != null) resource.StateChanged -= OnGiveResource;
-            _outputStorage.CurrentAmount--;
-            if (!_isWorking) TryStartNewProcess();
+            if (resource != null)
+            {
+                resource.StateChanged -= OnGiveResource;
+            }
+            OutputStorage.CurrentAmount--;
+            if (!_isWorking)
+            {
+                TryStartNewProcess();
+            }
         }
 
         public bool TryToGiveResource(ResourceObject resource)
         {
-            var storage = _inputStorages.Find(x => x.Resource == resource.Type);
+            var storage = InputStorages.Find(x => x.Resource == resource.Type);
             if (storage != null && storage.CurrentAmount < storage.Capacity)
             {
                 storage.CurrentAmount++;
@@ -114,7 +132,7 @@ namespace FactoryMechanics
             _particles.SetActive(false);
             _isWorking = false;
         }
-        
+
         private void StartWorking()
         {
             _particles.SetActive(true);
@@ -123,45 +141,18 @@ namespace FactoryMechanics
 
         private bool CheckIfEnoughOutputSpace()
         {
-            return _outputStorage.CurrentAmount >= _outputStorage.Capacity;
-        }  
-        
+            return OutputStorage.CurrentAmount >= OutputStorage.Capacity;
+        }
+
         private bool CheckIfHaveAllNeeds()
         {
             foreach (var resource in _needsResource)
             {
-                var currentStorage = _inputStorages.Find(x => x.Resource == resource);
-                if (currentStorage == null || currentStorage.CurrentAmount < 1)
-                {
-                    return false;
-                }
+                var currentStorage = InputStorages.Find(x => x.Resource == resource);
+                if (currentStorage == null || currentStorage.CurrentAmount < 1) return false;
             }
 
             return true;
-        }  
-
-        public List<ResourceType> Needs
-        {
-            get
-            {
-                return _needsResource;
-            }
-        }
-        
-        public Storage OutputStorage
-        {
-            get
-            {
-                return _outputStorage;
-            }
-        }
-        
-        public List<Storage> InputStorages
-        {
-            get
-            {
-                return _inputStorages;
-            }
         }
     }
 }
