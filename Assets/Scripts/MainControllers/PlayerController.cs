@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform _bottomPointBackpack;
 
     [SerializeField] private float _offsetInBackpack;
+    
+    [SerializeField] private float _radiusInteraction;
 
     private List<ResourceObject> _resourcesInBackpack;
 
@@ -17,22 +19,26 @@ public class PlayerController : MonoBehaviour
     {
         _resourcesInBackpack = new List<ResourceObject>();
     }
-
-    private void OnTriggerStay(Collider other)
+    
+    private void Update()
     {
-        var resource = other.GetComponent<ResourceObject>();
-        if (resource != null && resource.State != ResourceState.Backpacked)
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _radiusInteraction);
+        foreach (var hitCollider in hitColliders)
         {
-            TryToTakeResource(resource);
-        }
-        else if (other.GetComponent<BaseFactory>() != null)
-        {
-            var factory = other.GetComponent<BaseFactory>();
-            TryGiveResourceToFactory(factory);
-            UpdateBackpack();
+            var resource = hitCollider.GetComponent<ResourceObject>();
+            if (resource != null && resource.State != ResourceState.Backpacked)
+            {
+                TryToTakeResource(resource);
+            }
+            else if (hitCollider.GetComponent<BaseFactory>() != null)
+            {
+                var factory = hitCollider.GetComponent<BaseFactory>();
+                TryGiveResourceToFactory(factory);
+                UpdateBackpack();
+            }
         }
     }
-
+    
     private void UpdateBackpack()
     {
         for (var i = 0; i < _resourcesInBackpack.Count; i++)
