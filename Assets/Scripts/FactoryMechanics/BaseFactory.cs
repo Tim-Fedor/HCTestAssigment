@@ -7,6 +7,9 @@ namespace FactoryMechanics
 {
     public class BaseFactory : MonoBehaviour
     {
+        public delegate void OnStoragesChange();
+        public event OnStoragesChange StorageChanged;
+        
         [SerializeField] 
         private ResourceType _resource;
         [SerializeField] 
@@ -35,12 +38,19 @@ namespace FactoryMechanics
         private void Start()
         {
             OutputStorage = new Storage(_storageCapacity, _resource);
+            OutputStorage.CurrentAmountChanged += ChangedStorages;
             InputStorages = new List<Storage>();
-            foreach (var resource in _needsResource)
+            for(int i = 0; i < _needsResource.Count; i++)
             {
-                InputStorages.Add(new Storage(_needsCapacity, resource));
+                InputStorages.Add(new Storage(_needsCapacity, _needsResource[i]));
+                InputStorages[i].CurrentAmountChanged += ChangedStorages;
             }
             TryStartNewProcess();
+        }
+
+        private void ChangedStorages()
+        {
+            StorageChanged?.Invoke();
         }
 
         protected virtual void TryStartNewProcess()

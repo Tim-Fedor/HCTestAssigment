@@ -16,15 +16,17 @@ namespace FactoryMechanics
         [SerializeField] 
         private float _offsetY;
 
+        private void Start()
+        {
+            if(_factory != null){
+                _factory.StorageChanged += SetText;
+            }
+        }
+
         private void Update()
         {
             SetText();
-            var offsetPosY = _factory.transform.position.y + _offsetY;
-            var offsetPos = new Vector3(_factory.transform.position.x, offsetPosY, _factory.transform.position.z);
-            Vector2 canvasPos;
-            Vector2 screenPoint = Camera.main.WorldToScreenPoint(offsetPos);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvas, screenPoint, null, out canvasPos);
-            _UIBox.localPosition = canvasPos;
+            UpdateUIPosAboveFactory();
         }
 
         private void SetText()
@@ -54,6 +56,16 @@ namespace FactoryMechanics
             }
 
             _description.text = string.Concat(_description.text, "\n", quantity);
+        }
+
+        private void UpdateUIPosAboveFactory()
+        {
+            var offsetPosY = _factory.transform.position.y + _offsetY;
+            var offsetPos = new Vector3(_factory.transform.position.x, offsetPosY, _factory.transform.position.z);
+            Vector2 canvasPos;
+            Vector2 screenPoint = Camera.main.WorldToScreenPoint(offsetPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvas, screenPoint, null, out canvasPos);
+            _UIBox.localPosition = canvasPos;
         }
     }
 }
