@@ -1,12 +1,12 @@
+using System;
 using Resource;
 
 namespace FactoryMechanics
 {
     public class Storage
     {
+        public event Action CurrentAmountChanged;
         private int _currentAmount;
-        public delegate void OnCurrentAmountChange();
-        public event OnCurrentAmountChange CurrentAmountChanged;
         public Storage(int capacity, ResourceType type)
         {
             Resource = type;

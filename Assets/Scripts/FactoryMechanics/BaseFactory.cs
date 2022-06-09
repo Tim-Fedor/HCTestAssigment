@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Resource;
@@ -7,9 +8,7 @@ namespace FactoryMechanics
 {
     public class BaseFactory : MonoBehaviour
     {
-        public delegate void OnStoragesChange();
-        public event OnStoragesChange StorageChanged;
-        
+        public event Action StorageChanged;
         [SerializeField] 
         private ResourceType _resource;
         [SerializeField] 

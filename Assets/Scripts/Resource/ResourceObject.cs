@@ -1,11 +1,11 @@
+using System;
 using UnityEngine;
 
 namespace Resource
 {
     public class ResourceObject : MonoBehaviour
     {
-        public delegate void OnStateChange(ResourceObject resource);
-
+        public event Action<ResourceObject> StateChanged;
         [SerializeField] 
         private float _movingSpeed;
         [SerializeField] 
@@ -51,8 +51,6 @@ namespace Resource
                 }
             }
         }
-
-        public event OnStateChange StateChanged;
 
         public bool MoveToPoint(Vector3 target, ResourceState newState)
         {
